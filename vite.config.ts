@@ -4,7 +4,7 @@ import path from 'path';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
-  return {\'base:'I Clean-my-speaker/,I
+  return {
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
