@@ -1,0 +1,6 @@
+{
+  "name": "CleanMySpeaker",
+  "description": "Clean, test, and restore phone speakers using precision Web Audio frequency tones, water ejection pulses, and diagnostic audio tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
