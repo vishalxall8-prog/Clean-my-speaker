@@ -8,7 +8,12 @@ export type PageRoute =
   | 'faq'
   | 'blog'
   | 'blog-post'
-  | 'sitemap';
+  | 'sitemap'
+  | 'contact'
+  | 'about'
+  | 'privacy'
+  | 'terms'
+  | 'disclaimer';
 
 export type CleanerMode = 'deep' | 'pulse' | 'sweep' | 'vibrate' | 'gentle';
 

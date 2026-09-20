@@ -111,6 +111,53 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ page, blogSlug }) => {
       title = 'HTML Sitemap & SEO Directory | CleanMySpeaker';
       description = 'Index of all tools, diagnostic tests, guides, and troubleshooting resources available on CleanMySpeaker.';
       canonical = 'https://cleanmyspeaker.app/sitemap';
+    } else if (page === 'about') {
+      title = 'About Us — The Science & Mission Behind CleanMySpeaker';
+      description = 'Learn about CleanMySpeaker, our scientific approach to non-invasive water ejection using 165Hz acoustic waves, our safety ethics, and our team.';
+      canonical = 'https://cleanmyspeaker.app/about';
+      jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'AboutPage',
+        name: 'About CleanMySpeaker',
+        description: 'Mission and technical science behind CleanMySpeaker phone speaker cleaning and audio diagnostic utilities.',
+        publisher: {
+          '@type': 'Organization',
+          name: 'CleanMySpeaker',
+          url: 'https://cleanmyspeaker.app',
+          contactPoint: {
+            '@type': 'ContactPoint',
+            email: 'km1631513@gmail.com',
+            contactType: 'customer support',
+          },
+        },
+      };
+    } else if (page === 'contact') {
+      title = 'Contact Us — CleanMySpeaker Support & Inquiries';
+      description = 'Contact the CleanMySpeaker team for audio diagnostics support, suggestions, bug reports, and business inquiries at km1631513@gmail.com.';
+      canonical = 'https://cleanmyspeaker.app/contact';
+      jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'ContactPage',
+        name: 'Contact CleanMySpeaker',
+        description: 'Official contact and user support channel for CleanMySpeaker.',
+        mainEntity: {
+          '@type': 'Organization',
+          name: 'CleanMySpeaker',
+          email: 'km1631513@gmail.com',
+        },
+      };
+    } else if (page === 'privacy') {
+      title = 'Privacy Policy — CleanMySpeaker';
+      description = 'Privacy Policy for CleanMySpeaker explaining our client-side audio processing, Google AdSense cookies, GDPR, CCPA, and data practices.';
+      canonical = 'https://cleanmyspeaker.app/privacy';
+    } else if (page === 'terms') {
+      title = 'Terms of Service — CleanMySpeaker';
+      description = 'Terms of Service, acceptable use policies, and conditions for CleanMySpeaker phone speaker cleaning utility.';
+      canonical = 'https://cleanmyspeaker.app/terms';
+    } else if (page === 'disclaimer') {
+      title = 'Disclaimer & Safety Warning — CleanMySpeaker';
+      description = 'Important acoustic safety guidelines, hearing protection advice, and hardware limitations for CleanMySpeaker.';
+      canonical = 'https://cleanmyspeaker.app/disclaimer';
     }
 
     // Update document head

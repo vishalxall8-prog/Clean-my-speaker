@@ -1,35 +1,61 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface AdSlotProps {
   id?: string;
-  format?: 'banner' | 'rectangle' | 'in-article';
+  client?: string;
+  slot?: string;
+  format?: 'auto' | 'fluid' | 'rectangle' | 'horizontal';
+  responsive?: boolean;
   className?: string;
 }
 
+declare global {
+  interface Window {
+    adsbygoogle?: unknown[];
+  }
+}
+
 export const AdSlot: React.FC<AdSlotProps> = ({
-  id = 'ad-slot-default',
-  format = 'banner',
+  id = 'ad-slot',
+  client,
+  slot,
+  format = 'auto',
+  responsive = true,
   className = '',
 }) => {
+  // If no client or slot is configured yet (pre-approval review stage),
+  // we do NOT render any visible placeholder boxes.
+  // Google AdSense policies strictly penalize websites displaying empty
+  // "AdSense Placeholder" or dummy advertisement boxes.
+  const hasConfig = Boolean(client && slot);
+
+  useEffect(() => {
+    if (hasConfig) {
+      try {
+        if (typeof window !== 'undefined') {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        }
+      } catch (err) {
+        console.error('AdSense error:', err);
+      }
+    }
+  }, [hasConfig]);
+
+  if (!hasConfig) {
+    // Return null so the site appears 100% polished, complete, and free of "under construction" placeholders during Google AdSense review
+    return null;
+  }
+
   return (
-    <div
-      id={id}
-      className={`w-full mx-auto my-6 flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-950/40 border border-dashed border-slate-800/80 text-center transition-colors hover:border-slate-700/60 ${className}`}
-      style={{
-        minHeight: format === 'banner' ? '90px' : format === 'rectangle' ? '250px' : '120px',
-      }}
-    >
-      <div className="flex items-center gap-2 mb-1.5">
-        <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
-          Advertisement
-        </span>
-      </div>
-      <p className="text-xs text-slate-500 font-medium">
-        Google AdSense Placeholder
-      </p>
-      <span className="text-[10px] text-slate-600 font-mono mt-0.5">
-        Responsive Slot ({format}) • Clean, non-intrusive layout
-      </span>
+    <div id={id} className={`w-full my-4 flex justify-center overflow-hidden ${className}`}>
+      <ins
+        className="adsbygoogle"
+        style={{ display: 'block' }}
+        data-ad-client={client}
+        data-ad-slot={slot}
+        data-ad-format={format}
+        data-full-width-responsive={responsive ? 'true' : 'false'}
+      />
     </div>
   );
 };

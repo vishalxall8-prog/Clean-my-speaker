@@ -11,8 +11,15 @@ import { VolumeTestTool } from './components/VolumeTestTool';
 import { SafetyNotice } from './components/SafetyNotice';
 import { FAQSection } from './components/FAQSection';
 import { AffiliateSection } from './components/AffiliateSection';
+import { HindiSpeakerGuide } from './components/HindiSpeakerGuide';
 import { BlogView } from './components/BlogView';
 import { SitemapView } from './components/SitemapView';
+import { ContactView } from './components/ContactView';
+import { AboutView } from './components/AboutView';
+import { PrivacyPolicyView } from './components/PrivacyPolicyView';
+import { TermsView } from './components/TermsView';
+import { DisclaimerView } from './components/DisclaimerView';
+import { AuthoritativeContentSection } from './components/AuthoritativeContentSection';
 import { AdSlot } from './components/AdSlot';
 import { audioEngine } from './lib/audioEngine';
 import { analytics } from './lib/analytics';
@@ -57,6 +64,11 @@ export default function App() {
           'faq',
           'blog',
           'sitemap',
+          'contact',
+          'about',
+          'privacy',
+          'terms',
+          'disclaimer',
         ].includes(target)
       ) {
         setCurrentPage(target as PageRoute);
@@ -166,6 +178,9 @@ export default function App() {
 
             {/* Non-intrusive Top Banner Ad */}
             <AdSlot id="home-ad-top" format="banner" />
+
+            {/* SEO-RICH COMPREHENSIVE HINDI GUIDE */}
+            <HindiSpeakerGuide />
 
             {/* HOW IT WORKS SECTION */}
             <section id="how-it-works-section" className="w-full max-w-5xl mx-auto">
@@ -430,6 +445,12 @@ export default function App() {
               </div>
             </section>
 
+            {/* AUTHORITATIVE ACOUSTIC & HARDWARE CARE GUIDE (E-E-A-T) */}
+            <AuthoritativeContentSection onNavigate={(p) => navigateTo(p)} />
+
+            {/* HINDI SPEAKER CLEANING GUIDE */}
+            <HindiSpeakerGuide />
+
             {/* SAFETY INFORMATION SECTION */}
             <SafetyNotice />
 
@@ -462,6 +483,7 @@ export default function App() {
 
             <SpeakerCleanerTool onNavigateToTest={() => navigateTo('speaker-test')} />
             <AdSlot id="cleaner-page-ad" format="banner" />
+            <HindiSpeakerGuide />
             <SafetyNotice />
           </div>
         )}
@@ -577,6 +599,31 @@ export default function App() {
             onNavigate={(p) => navigateTo(p)}
             onSelectBlog={handleSelectBlog}
           />
+        )}
+
+        {/* CONTACT US ROUTE */}
+        {currentPage === 'contact' && (
+          <ContactView onNavigate={(p) => navigateTo(p)} />
+        )}
+
+        {/* ABOUT US ROUTE */}
+        {currentPage === 'about' && (
+          <AboutView onNavigate={(p) => navigateTo(p)} />
+        )}
+
+        {/* PRIVACY POLICY ROUTE */}
+        {currentPage === 'privacy' && (
+          <PrivacyPolicyView onNavigate={(p) => navigateTo(p)} />
+        )}
+
+        {/* TERMS OF SERVICE ROUTE */}
+        {currentPage === 'terms' && (
+          <TermsView onNavigate={(p) => navigateTo(p)} />
+        )}
+
+        {/* DISCLAIMER ROUTE */}
+        {currentPage === 'disclaimer' && (
+          <DisclaimerView onNavigate={(p) => navigateTo(p)} />
         )}
       </main>
 

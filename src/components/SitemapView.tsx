@@ -21,6 +21,11 @@ export const SitemapView: React.FC<SitemapViewProps> = ({ onNavigate, onSelectBl
     { path: '/volume-test', name: 'Volume & Decibel Ladder Test', page: 'volume-test', changefreq: 'weekly', priority: '0.8', desc: 'Calibrated acoustic ladder and distortion test.' },
     { path: '/faq', name: 'Frequently Asked Questions', page: 'faq', changefreq: 'monthly', priority: '0.7', desc: 'Comprehensive answers to speaker maintenance and safety.' },
     { path: '/blog', name: 'Technical Audio Guides & Articles', page: 'blog', changefreq: 'weekly', priority: '0.8', desc: 'Troubleshooting guides for iPhone, Android, and audio hardware.' },
+    { path: '/about', name: 'About CleanMySpeaker', page: 'about', changefreq: 'monthly', priority: '0.7', desc: 'Mission, acoustic science background, team ethics, and hardware safety standards.' },
+    { path: '/contact', name: 'Contact Us', page: 'contact', changefreq: 'monthly', priority: '0.7', desc: 'Official support and technical contact email: km1631513@gmail.com' },
+    { path: '/privacy', name: 'Privacy Policy', page: 'privacy', changefreq: 'monthly', priority: '0.6', desc: 'GDPR, CCPA, and Google AdSense cookie compliance documentation.' },
+    { path: '/terms', name: 'Terms of Service', page: 'terms', changefreq: 'monthly', priority: '0.6', desc: 'Conditions of use and terms governing CleanMySpeaker acoustic utilities.' },
+    { path: '/disclaimer', name: 'Safety & Hardware Disclaimer', page: 'disclaimer', changefreq: 'monthly', priority: '0.6', desc: 'Hearing safety guidelines and acoustic physics hardware limitations.' },
   ];
 
   const xmlSitemapContent = `<?xml version="1.0" encoding="UTF-8"?>

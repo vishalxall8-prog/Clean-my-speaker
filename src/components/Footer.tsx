@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageRoute } from '../types';
-import { Volume2, Droplets, Activity, Headphones, Sliders, HelpCircle, BookOpen, ShieldCheck, Heart, Globe } from 'lucide-react';
+import { Volume2, Droplets, Activity, Headphones, Sliders, HelpCircle, BookOpen, ShieldCheck, Heart, Globe, Mail, Info } from 'lucide-react';
 
 interface FooterProps {
   onNavigate: (page: PageRoute) => void;
@@ -110,6 +110,51 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <button
+                  onClick={() => onNavigate('about')}
+                  className="hover:text-cyan-300 transition-colors flex items-center gap-1.5"
+                >
+                  <Info className="w-3.5 h-3.5 text-cyan-300" />
+                  <span>About CleanMySpeaker</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('contact')}
+                  className="hover:text-cyan-300 transition-colors flex items-center gap-1.5 text-cyan-400"
+                >
+                  <Mail className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="font-semibold">Contact Us</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('privacy')}
+                  className="hover:text-cyan-300 transition-colors flex items-center gap-1.5"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Privacy Policy</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('terms')}
+                  className="hover:text-cyan-300 transition-colors flex items-center gap-1.5"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Terms of Service</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('disclaimer')}
+                  className="hover:text-cyan-300 transition-colors flex items-center gap-1.5"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Disclaimer</span>
+                </button>
+              </li>
+              <li>
+                <button
                   onClick={() => onNavigate('sitemap')}
                   className="hover:text-cyan-300 transition-colors flex items-center gap-1.5"
                 >
@@ -120,32 +165,67 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </ul>
           </div>
 
-          {/* Safety Notice Short */}
+          {/* Safety & Contact Email */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-200 mb-3">
-              Safety & Transparency
+              Support & Contact
             </h4>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Results may vary based on phone make and speaker condition. Acoustic frequencies create physical air pressure, but cannot repair mechanically torn membranes or deep internal corrosion.
+            <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
+              Need technical help, sound advice, or have a partnership inquiry?
             </p>
+            <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl space-y-1.5">
+              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Official Email</span>
+              <a
+                href="mailto:km1631513@gmail.com"
+                className="text-xs font-mono font-medium text-cyan-300 hover:text-cyan-200 transition-colors flex items-center gap-1.5 break-all"
+              >
+                <Mail className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span>km1631513@gmail.com</span>
+              </a>
+            </div>
           </div>
         </div>
 
         {/* Bottom bar */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <p>© {new Date().getFullYear()} CleanMySpeaker. All rights reserved. Clean. Test. Restore Your Sound.</p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <button
-              onClick={() => onNavigate('faq')}
+              onClick={() => onNavigate('about')}
               className="hover:text-slate-300 transition-colors"
             >
-              Privacy & Disclaimers
+              About Us
+            </button>
+            <button
+              onClick={() => onNavigate('privacy')}
+              className="hover:text-slate-300 transition-colors"
+            >
+              Privacy Policy
+            </button>
+            <button
+              onClick={() => onNavigate('terms')}
+              className="hover:text-slate-300 transition-colors"
+            >
+              Terms of Service
+            </button>
+            <button
+              onClick={() => onNavigate('disclaimer')}
+              className="hover:text-slate-300 transition-colors"
+            >
+              Disclaimer
+            </button>
+            <button
+              onClick={() => onNavigate('contact')}
+              className="hover:text-cyan-300 text-slate-400 transition-colors flex items-center gap-1"
+            >
+              <Mail className="w-3 h-3 text-cyan-400" />
+              <span>Contact</span>
             </button>
             <button
               onClick={() => onNavigate('sitemap')}
               className="hover:text-slate-300 transition-colors"
             >
-              Directory
+              Sitemap
             </button>
           </div>
         </div>

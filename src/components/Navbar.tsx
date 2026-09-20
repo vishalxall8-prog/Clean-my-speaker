@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PageRoute } from '../types';
-import { Volume2, Droplets, Activity, Headphones, HelpCircle, BookOpen, Menu, X, Sliders } from 'lucide-react';
+import { Volume2, Droplets, Activity, Headphones, HelpCircle, BookOpen, Menu, X, Sliders, Mail, Info } from 'lucide-react';
 
 interface NavbarProps {
   currentPage: PageRoute;
@@ -17,8 +17,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
     { id: 'speaker-test', label: 'Speaker Test', icon: <Activity className="w-4 h-4 text-emerald-400" /> },
     { id: 'left-right-test', label: 'L/R Audio', icon: <Headphones className="w-4 h-4 text-indigo-400" /> },
     { id: 'volume-test', label: 'Volume Test', icon: <Sliders className="w-4 h-4 text-amber-400" /> },
+    { id: 'about', label: 'About', icon: <Info className="w-4 h-4 text-cyan-300" /> },
     { id: 'faq', label: 'FAQ', icon: <HelpCircle className="w-4 h-4 text-slate-400" /> },
     { id: 'blog', label: 'Guides', icon: <BookOpen className="w-4 h-4 text-slate-400" /> },
+    { id: 'contact', label: 'Contact', icon: <Mail className="w-4 h-4 text-cyan-400" /> },
   ];
 
   const handleNav = (page: PageRoute) => {
