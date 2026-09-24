@@ -19,6 +19,7 @@ export const SitemapView: React.FC<SitemapViewProps> = ({ onNavigate, onSelectBl
     { path: '/speaker-test', name: 'Speaker Frequency Test', page: 'speaker-test', changefreq: 'weekly', priority: '0.8', desc: '20Hz - 20kHz logarithmic frequency generator & sine sweep.' },
     { path: '/left-right-test', name: 'Left / Right Stereo Test', page: 'left-right-test', changefreq: 'weekly', priority: '0.8', desc: 'Stereo panning and channel separation diagnostic test.' },
     { path: '/volume-test', name: 'Volume & Decibel Ladder Test', page: 'volume-test', changefreq: 'weekly', priority: '0.8', desc: 'Calibrated acoustic ladder and distortion test.' },
+    { path: '/ai-chat', name: 'AI Audio Doctor (Gemini + Search)', page: 'ai-chat', changefreq: 'daily', priority: '0.9', desc: 'AI diagnostics for wet phones, muffled audio, 165Hz physics, with live Google Search grounding.' },
     { path: '/faq', name: 'Frequently Asked Questions', page: 'faq', changefreq: 'monthly', priority: '0.7', desc: 'Comprehensive answers to speaker maintenance and safety.' },
     { path: '/blog', name: 'Technical Audio Guides & Articles', page: 'blog', changefreq: 'weekly', priority: '0.8', desc: 'Troubleshooting guides for iPhone, Android, and audio hardware.' },
     { path: '/about', name: 'About CleanMySpeaker', page: 'about', changefreq: 'monthly', priority: '0.7', desc: 'Mission, acoustic science background, team ethics, and hardware safety standards.' },

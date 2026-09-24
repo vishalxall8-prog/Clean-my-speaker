@@ -13,6 +13,7 @@ import { FAQSection } from './components/FAQSection';
 import { AffiliateSection } from './components/AffiliateSection';
 import { HindiSpeakerGuide } from './components/HindiSpeakerGuide';
 import { BlogView } from './components/BlogView';
+import { BlogSection } from './components/BlogSection';
 import { SitemapView } from './components/SitemapView';
 import { ContactView } from './components/ContactView';
 import { AboutView } from './components/AboutView';
@@ -20,9 +21,15 @@ import { PrivacyPolicyView } from './components/PrivacyPolicyView';
 import { TermsView } from './components/TermsView';
 import { DisclaimerView } from './components/DisclaimerView';
 import { AuthoritativeContentSection } from './components/AuthoritativeContentSection';
+import { AIChatView } from './components/AIChatView';
+import { FloatingAIChatWidget } from './components/FloatingAIChatWidget';
+import { RecentActivitySection } from './components/RecentActivitySection';
+import { ViralShareBar } from './components/ViralShareBar';
 import { AdSlot } from './components/AdSlot';
+import { BLOG_POSTS } from './data/content';
 import { audioEngine } from './lib/audioEngine';
 import { analytics } from './lib/analytics';
+import { viralGrowthEngine } from './lib/viralGrowthEngine';
 import {
   Volume2,
   Droplets,
@@ -37,6 +44,7 @@ import {
   Globe,
   ArrowRight,
   HelpCircle,
+  Bot,
 } from 'lucide-react';
 
 export default function App() {
@@ -51,7 +59,16 @@ export default function App() {
       const target = hash || path;
 
       if (target.startsWith('blog/')) {
-        const slug = target.replace('blog/', '');
+        let slug = target.replace('blog/', '');
+        const matched = BLOG_POSTS.find(
+          (p) =>
+            p.slug === slug ||
+            p.slug.replace(/\.html$/, '') === slug.replace(/\.html$/, '') ||
+            p.url === `/blog/${slug}`
+        );
+        if (matched) {
+          slug = matched.slug;
+        }
         setCurrentPage('blog-post');
         setBlogSlug(slug);
       } else if (
@@ -61,6 +78,7 @@ export default function App() {
           'speaker-test',
           'left-right-test',
           'volume-test',
+          'ai-chat',
           'faq',
           'blog',
           'sitemap',
@@ -78,6 +96,9 @@ export default function App() {
         setBlogSlug(undefined);
       }
     };
+
+    // Track inbound marketing channels & viral referral codes
+    viralGrowthEngine.captureInboundReferral();
 
     handleUrlChange();
     window.addEventListener('popstate', handleUrlChange);
@@ -134,14 +155,14 @@ export default function App() {
               </div>
 
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15]">
-                Clean & Test Your{' '}
+                Clean My Speaker —{' '}
                 <span className="bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-400 bg-clip-text text-transparent">
-                  Phone Speaker
+                  Eject Water & Fix Sound
                 </span>
               </h1>
 
               <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-                Free browser-based tools for speaker cleaning, water-eject testing and audio diagnostics.
+                Clean my speaker online for free with calibrated 165Hz sound waves. Instantly eject trapped water, dislodge dust, and restore loud, crystal-clear audio on iPhone and Android.
               </p>
 
               {/* Primary & Secondary Hero CTAs */}
@@ -175,6 +196,12 @@ export default function App() {
                 onNavigateToTest={() => navigateTo('speaker-test')}
               />
             </section>
+
+            {/* RECENT CLEANING ACTIVITY LOG */}
+            <RecentActivitySection onNavigate={(p) => navigateTo(p)} />
+
+            {/* VIRAL SOCIAL SHARING & GROWTH BAR */}
+            <ViralShareBar />
 
             {/* Non-intrusive Top Banner Ad */}
             <AdSlot id="home-ad-top" format="banner" />
@@ -454,6 +481,53 @@ export default function App() {
             {/* SAFETY INFORMATION SECTION */}
             <SafetyNotice />
 
+            {/* AI AUDIO DOCTOR & DIAGNOSTICS BANNER */}
+            <section id="ai-doctor-banner" className="w-full max-w-5xl mx-auto">
+              <div className="relative rounded-3xl bg-gradient-to-br from-indigo-950/70 via-slate-900 to-purple-950/50 border border-indigo-800/50 p-6 sm:p-8 overflow-hidden shadow-2xl">
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                  <div className="space-y-3 max-w-xl">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-900/60 text-purple-300 border border-purple-700/50">
+                        <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                        AI Speaker Diagnostics
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-900/60 text-blue-300 border border-blue-700/50">
+                        <Globe className="w-3.5 h-3.5 text-blue-400" />
+                        Live Google Search Grounded
+                      </span>
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                      Have a Wet Phone or Muffled Speaker?
+                    </h2>
+                    <p className="text-sm text-slate-300 leading-relaxed">
+                      Chat with CleanMySpeaker AI powered by <strong>Gemini 3.8 Flash</strong>. Get instant, device-tailored instructions on water expulsion, acoustic physics, and safe drying steps backed by real-time Google search data.
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row md:flex-col gap-3 shrink-0">
+                    <button
+                      onClick={() => navigateTo('ai-chat')}
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-indigo-500 via-purple-600 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-white shadow-lg shadow-purple-500/25 transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer"
+                    >
+                      <Bot className="w-4 h-4" />
+                      <span>Ask AI Doctor Now</span>
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </button>
+                    <button
+                      onClick={() => navigateTo('water-eject')}
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-xs bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition-colors cursor-pointer"
+                    >
+                      <Droplets className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Eject Water with 165Hz</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* BLOG SECTION FOR ARTICLE SEO & TROUBLESHOOTING GUIDES */}
+            <BlogSection onSelectPost={handleSelectBlog} onNavigate={(p) => navigateTo(p)} />
+
             {/* Non-intrusive AdSlot */}
             <AdSlot id="home-ad-mid" format="banner" />
 
@@ -576,6 +650,11 @@ export default function App() {
           </div>
         )}
 
+        {/* DEDICATED AI CHATBOT ROUTE */}
+        {currentPage === 'ai-chat' && (
+          <AIChatView onNavigate={(p) => navigateTo(p)} />
+        )}
+
         {/* FAQ ROUTE */}
         {currentPage === 'faq' && (
           <div className="space-y-10">
@@ -629,6 +708,9 @@ export default function App() {
 
       {/* Main Footer */}
       <Footer onNavigate={(p) => navigateTo(p)} />
+
+      {/* Floating AI Chat Assistant Widget */}
+      <FloatingAIChatWidget currentPage={currentPage} onNavigate={navigateTo} />
     </div>
   );
 }

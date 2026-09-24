@@ -5,6 +5,7 @@ export type PageRoute =
   | 'speaker-test'
   | 'left-right-test'
   | 'volume-test'
+  | 'ai-chat'
   | 'faq'
   | 'blog'
   | 'blog-post'
@@ -14,6 +15,21 @@ export type PageRoute =
   | 'privacy'
   | 'terms'
   | 'disclaimer';
+
+export interface ChatSource {
+  title: string;
+  url: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+  sources?: ChatSource[];
+  searchQueries?: string[];
+  isError?: boolean;
+}
 
 export type CleanerMode = 'deep' | 'pulse' | 'sweep' | 'vibrate' | 'gentle';
 
@@ -27,6 +43,16 @@ export interface CleanerPreset {
   pulseRate: number; // Hz
   waveType: OscillatorType;
   accentColor: string;
+}
+
+export interface CleaningSession {
+  id: string;
+  toolType: 'speaker-cleaner' | 'water-eject';
+  modeName: string;
+  durationSeconds: number;
+  timestamp: number;
+  formattedDate: string;
+  formattedTime: string;
 }
 
 export type FrequencyBand = 'sub-bass' | 'bass' | 'mid' | 'high' | 'sweep' | 'custom';
@@ -46,7 +72,9 @@ export type ChannelSide = 'left' | 'right' | 'both' | 'alternate';
 
 export interface BlogPost {
   slug: string;
+  url?: string;
   title: string;
+  mainKeyword?: string;
   excerpt: string;
   readingTime: string;
   publishDate: string;
@@ -57,8 +85,18 @@ export interface BlogPost {
     sections: {
       heading: string;
       body: string[];
+      listType?: 'ordered' | 'unordered';
+      listItems?: string[];
       tip?: string;
       warning?: string;
+      cta?: {
+        text: string;
+        target: PageRoute;
+      };
+    }[];
+    faqs?: {
+      question: string;
+      answer: string;
     }[];
     conclusion: string;
     recommendedTool: PageRoute;

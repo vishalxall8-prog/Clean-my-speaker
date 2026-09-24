@@ -1,9 +1,9 @@
 import React from 'react';
 import { PageRoute } from '../types';
-import { Volume2, Droplets, Activity, Headphones, Sliders, HelpCircle, BookOpen, ShieldCheck, Heart, Globe, Mail, Info } from 'lucide-react';
+import { Volume2, Droplets, Activity, Headphones, Sliders, HelpCircle, BookOpen, ShieldCheck, Heart, Globe, Mail, Info, Bot } from 'lucide-react';
 
 interface FooterProps {
-  onNavigate: (page: PageRoute) => void;
+  onNavigate: (page: PageRoute, slug?: string) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
@@ -36,6 +36,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               Diagnostic Tools
             </h4>
             <ul className="space-y-2 text-xs">
+              <li>
+                <button
+                  onClick={() => onNavigate('ai-chat')}
+                  className="hover:text-purple-300 transition-colors flex items-center gap-1.5 font-medium text-purple-400"
+                >
+                  <Bot className="w-3.5 h-3.5 text-purple-400" />
+                  <span>AI Audio Doctor (Gemini)</span>
+                </button>
+              </li>
               <li>
                 <button
                   onClick={() => onNavigate('speaker-cleaner')}
@@ -87,16 +96,25 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Resources & Guides */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-200 mb-3">
-              Guides & Help
+              Blog & Troubleshooting
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
                 <button
                   onClick={() => onNavigate('blog')}
-                  className="hover:text-cyan-300 transition-colors flex items-center gap-1.5"
+                  className="hover:text-cyan-300 transition-colors flex items-center gap-1.5 text-cyan-400 font-semibold"
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Audio Knowledge Base</span>
+                  <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Blog & Audio Guides</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('blog-post', 'remove-water-from-phone-speaker.html')}
+                  className="hover:text-cyan-300 transition-colors flex items-center gap-1.5 text-left text-slate-300"
+                >
+                  <Droplets className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                  <span className="line-clamp-1">Remove Water From Phone</span>
                 </button>
               </li>
               <li>

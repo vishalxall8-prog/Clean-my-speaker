@@ -3,8 +3,11 @@ import { CleanerMode } from '../types';
 import { CLEANER_PRESETS } from '../data/content';
 import { audioEngine } from '../lib/audioEngine';
 import { analytics } from '../lib/analytics';
+import { cleaningHistory } from '../lib/cleaningHistory';
+import { viralGrowthEngine } from '../lib/viralGrowthEngine';
+import { haptic } from '../lib/haptics';
 import { SpeakerVisualizer } from './SpeakerVisualizer';
-import { Play, Pause, Square, Sparkles, AlertTriangle, CheckCircle2, RotateCcw, Volume2, ShieldAlert, Zap, Activity, Shield } from 'lucide-react';
+import { Play, Pause, Square, Sparkles, AlertTriangle, CheckCircle2, RotateCcw, Volume2, ShieldAlert, Zap, Activity, Shield, Share2 } from 'lucide-react';
 
 interface SpeakerCleanerToolProps {
   initialDuration?: number;
@@ -43,6 +46,7 @@ export const SpeakerCleanerTool: React.FC<SpeakerCleanerToolProps> = ({
   }, []);
 
   const handleStartCleaning = async () => {
+    haptic.start();
     await audioEngine.resume();
     setIsCompleted(false);
     setIsPaused(false);
@@ -62,7 +66,13 @@ export const SpeakerCleanerTool: React.FC<SpeakerCleanerToolProps> = ({
           setIsPlaying(false);
           setIsPaused(false);
           setIsCompleted(true);
+          haptic.success();
           analytics.track('cleaner_completed', { mode: selectedMode, duration });
+          cleaningHistory.recordSession({
+            toolType: 'speaker-cleaner',
+            modeName: activePreset.name,
+            durationSeconds: duration,
+          });
           return duration;
         }
         return prev - 1;
@@ -71,6 +81,7 @@ export const SpeakerCleanerTool: React.FC<SpeakerCleanerToolProps> = ({
   };
 
   const handlePause = () => {
+    haptic.stop();
     if (timerRef.current) clearInterval(timerRef.current);
     audioEngine.stop();
     setIsPlaying(false);
@@ -79,6 +90,7 @@ export const SpeakerCleanerTool: React.FC<SpeakerCleanerToolProps> = ({
   };
 
   const handleResume = async () => {
+    haptic.start();
     await audioEngine.resume();
     setIsPlaying(true);
     setIsPaused(false);
@@ -94,7 +106,13 @@ export const SpeakerCleanerTool: React.FC<SpeakerCleanerToolProps> = ({
           setIsPlaying(false);
           setIsPaused(false);
           setIsCompleted(true);
+          haptic.success();
           analytics.track('cleaner_completed', { mode: selectedMode, duration });
+          cleaningHistory.recordSession({
+            toolType: 'speaker-cleaner',
+            modeName: activePreset.name,
+            durationSeconds: duration,
+          });
           return duration;
         }
         return prev - 1;
@@ -103,6 +121,7 @@ export const SpeakerCleanerTool: React.FC<SpeakerCleanerToolProps> = ({
   };
 
   const handleStop = () => {
+    haptic.stop();
     if (timerRef.current) clearInterval(timerRef.current);
     audioEngine.stop();
     setIsPlaying(false);
@@ -112,6 +131,7 @@ export const SpeakerCleanerTool: React.FC<SpeakerCleanerToolProps> = ({
   };
 
   const handleModeChange = (mode: CleanerMode) => {
+    haptic.light();
     setSelectedMode(mode);
     if (isPlaying) {
       audioEngine.playCleanerPreset(mode);
@@ -235,12 +255,86 @@ export const SpeakerCleanerTool: React.FC<SpeakerCleanerToolProps> = ({
             </p>
           </div>
 
-          {/* Progress bar */}
-          <div className="w-full max-w-md bg-slate-950 rounded-full h-2 mt-4 overflow-hidden border border-slate-800">
+          {/* Active Cleaning Cycle Progress Bar */}
+          <div className="w-full max-w-lg mt-5 p-3.5 sm:p-4 rounded-2xl bg-slate-950/80 border border-slate-800 shadow-inner space-y-2.5">
+            {/* Top Progress Info */}
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-1.5 font-semibold text-slate-300">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isPlaying
+                      ? 'bg-cyan-400 animate-ping'
+                      : isPaused
+                      ? 'bg-amber-400'
+                      : isCompleted
+                      ? 'bg-emerald-400'
+                      : 'bg-slate-600'
+                  }`}
+                />
+                <span className="text-slate-200">
+                  {isPlaying
+                    ? 'Active Cleaning Cycle'
+                    : isPaused
+                    ? 'Cleaning Paused'
+                    : isCompleted
+                    ? 'Cycle Complete'
+                    : 'Cleaning Cycle Progress'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-cyan-300 font-bold">
+                  {Math.round(progressPercentage)}%
+                </span>
+                <span className="text-slate-600">•</span>
+                <span className="font-mono text-slate-300 font-medium">
+                  <strong className="text-cyan-300">{timeLeft}s</strong> remaining
+                </span>
+              </div>
+            </div>
+
+            {/* Progress Bar Track */}
             <div
-              className="bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 h-full transition-all duration-300 rounded-full"
-              style={{ width: `${progressPercentage}%` }}
-            />
+              className="relative w-full bg-slate-900 rounded-full h-3.5 overflow-hidden border border-slate-800/80 p-0.5"
+              role="progressbar"
+              aria-valuenow={Math.round(progressPercentage)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Speaker cleaning cycle remaining time"
+            >
+              <div
+                className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 h-full rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(6,182,212,0.4)]"
+                style={{ width: `${progressPercentage}%` }}
+              >
+                {/* Live shimmer effect during playback */}
+                {isPlaying && (
+                  <div className="absolute inset-0 bg-white/25 animate-pulse rounded-full" />
+                )}
+              </div>
+            </div>
+
+            {/* Bottom Meta & Remaining Time Breakdown */}
+            <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium pt-0.5">
+              <span>Elapsed: {duration - timeLeft}s of {duration}s</span>
+              <span className="flex items-center gap-1">
+                <span>Time Remaining:</span>
+                <span className="font-mono font-bold text-cyan-300">{timeLeft}s</span>
+              </span>
+            </div>
+
+            {/* Quick 1-Tap 'Clean Again' Trigger inside Progress Bar Area */}
+            {isCompleted && !isPlaying && (
+              <div className="pt-2 border-t border-slate-800/80 animate-in fade-in slide-in-from-top-2 duration-200">
+                <button
+                  id="progress-bar-clean-again-btn"
+                  onClick={handleStartCleaning}
+                  className="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-cyan-300 hover:from-cyan-300 hover:to-teal-200 shadow-md shadow-cyan-900/30 flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer"
+                  title="One-tap quick restart of the 165Hz tone"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Clean Again (165Hz Tone)</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -390,24 +484,31 @@ export const SpeakerCleanerTool: React.FC<SpeakerCleanerToolProps> = ({
                 <p className="text-xs text-slate-300 mt-1 leading-relaxed">
                   The acoustic resonance cycle has concluded. Hold your phone upside down and lightly brush away any dislodged dust from the speaker grille.
                 </p>
-                {onNavigateToTest && (
-                  <div className="mt-3 flex items-center gap-2">
+                <div className="mt-3.5 flex flex-wrap items-center gap-2">
+                  {onNavigateToTest && (
                     <button
                       id="test-speaker-after-clean-btn"
                       onClick={onNavigateToTest}
-                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition-colors"
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition-colors cursor-pointer"
                     >
                       Run Speaker Audio Test Now →
                     </button>
-                    <button
-                      id="rerun-clean-btn"
-                      onClick={handleStartCleaning}
-                      className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-slate-800"
-                    >
-                      Run Another Cycle
-                    </button>
-                  </div>
-                )}
+                  )}
+                  <button
+                    onClick={() => viralGrowthEngine.shareNative()}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white shadow-md shadow-cyan-950/40 transition-colors cursor-pointer"
+                  >
+                    <Share2 className="w-3.5 h-3.5" />
+                    <span>Share With Friends</span>
+                  </button>
+                  <button
+                    id="rerun-clean-btn"
+                    onClick={handleStartCleaning}
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 cursor-pointer"
+                  >
+                    Run Another Cycle
+                  </button>
+                </div>
               </div>
             </div>
           </div>

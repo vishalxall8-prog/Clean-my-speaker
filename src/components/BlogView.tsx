@@ -2,7 +2,22 @@ import React, { useState } from 'react';
 import { BlogPost, PageRoute } from '../types';
 import { BLOG_POSTS } from '../data/content';
 import { AdSlot } from './AdSlot';
-import { BookOpen, Clock, Calendar, ArrowLeft, ArrowRight, ShieldAlert, Sparkles, Tag, CheckCircle2, ChevronRight } from 'lucide-react';
+import {
+  BookOpen,
+  Clock,
+  Calendar,
+  ArrowLeft,
+  ArrowRight,
+  ShieldAlert,
+  Sparkles,
+  Tag,
+  CheckCircle2,
+  ChevronRight,
+  HelpCircle,
+  Share2,
+  Check,
+  ExternalLink,
+} from 'lucide-react';
 
 interface BlogViewProps {
   currentSlug?: string;
@@ -16,35 +31,79 @@ export const BlogView: React.FC<BlogViewProps> = ({
   onNavigate,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const categories = ['All', 'Cleaning', 'Water Damage', 'Diagnostics', 'Hardware Care'];
 
-  const activePost = currentSlug ? BLOG_POSTS.find((p) => p.slug === currentSlug) : null;
+  const activePost = currentSlug
+    ? BLOG_POSTS.find(
+        (p) =>
+          p.slug === currentSlug ||
+          p.slug.replace(/\.html$/, '') === currentSlug.replace(/\.html$/, '') ||
+          p.url === currentSlug ||
+          p.url === `/blog/${currentSlug}`
+      )
+    : null;
+
+  const handleCopyLink = () => {
+    if (!activePost) return;
+    const url = `https://cleanmyspeaker.app/blog/${activePost.slug}`;
+    navigator.clipboard.writeText(url);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
 
   // Render individual blog post
   if (activePost) {
     return (
       <div id="blog-single-post" className="w-full max-w-4xl mx-auto py-6 space-y-8">
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-slate-400">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onNavigate('blog')}
+              className="hover:text-cyan-300 flex items-center gap-1 transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to All Guides</span>
+            </button>
+            <span>/</span>
+            <span className="text-cyan-400 font-medium truncate max-w-xs sm:max-w-md">
+              {activePost.title}
+            </span>
+          </div>
+
           <button
-            onClick={() => onNavigate('blog')}
-            className="hover:text-cyan-300 flex items-center gap-1 transition-colors"
+            onClick={handleCopyLink}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white transition-all text-xs"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to All Guides</span>
+            {copiedLink ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-emerald-400 font-semibold">Link Copied!</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="w-3.5 h-3.5 text-slate-400" />
+                <span>Share Guide</span>
+              </>
+            )}
           </button>
-          <span>/</span>
-          <span className="text-cyan-400 font-medium truncate">{activePost.title}</span>
         </div>
 
         {/* Article Header */}
         <article className="rounded-3xl bg-slate-900/80 border border-slate-800 p-6 sm:p-10 shadow-xl space-y-6">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/80 px-2.5 py-1 rounded-lg border border-cyan-800/60">
               {activePost.category}
             </span>
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+            {activePost.mainKeyword && (
+              <span className="text-xs font-mono font-medium text-emerald-300 bg-emerald-950/70 px-2.5 py-1 rounded-lg border border-emerald-800/60 flex items-center gap-1">
+                <Tag className="w-3 h-3 text-emerald-400" />
+                <span>Keyword: {activePost.mainKeyword}</span>
+              </span>
+            )}
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 ml-auto">
               <Clock className="w-3.5 h-3.5" />
               <span>{activePost.readingTime}</span>
             </div>
@@ -68,7 +127,7 @@ export const BlogView: React.FC<BlogViewProps> = ({
           {/* Article Sections */}
           <div className="space-y-8 pt-4">
             {activePost.content.sections.map((sec, idx) => (
-              <section key={idx} className="space-y-3">
+              <section key={idx} className="space-y-4">
                 <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
                   <span>{sec.heading}</span>
@@ -79,6 +138,43 @@ export const BlogView: React.FC<BlogViewProps> = ({
                     <p key={pIdx}>{p}</p>
                   ))}
                 </div>
+
+                {/* List items if any */}
+                {sec.listItems && sec.listItems.length > 0 && (
+                  <div className="pl-6">
+                    {sec.listType === 'ordered' ? (
+                      <ol className="list-decimal list-outside space-y-2 text-sm sm:text-base text-slate-300 marker:text-cyan-400 marker:font-bold">
+                        {sec.listItems.map((item, lIdx) => (
+                          <li key={lIdx} className="pl-1 leading-relaxed">
+                            {item}
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <ul className="list-disc list-outside space-y-2 text-sm sm:text-base text-slate-300 marker:text-cyan-400">
+                        {sec.listItems.map((item, lIdx) => (
+                          <li key={lIdx} className="pl-1 leading-relaxed">
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+                {/* Inline CTA if any */}
+                {sec.cta && (
+                  <div className="my-5 pl-4">
+                    <button
+                      id={`blog-cta-${idx}`}
+                      onClick={() => onNavigate(sec.cta!.target)}
+                      className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl font-bold text-sm bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-400 text-slate-950 hover:from-cyan-300 hover:to-blue-300 shadow-lg shadow-cyan-500/20 active:scale-95 transition-all cursor-pointer"
+                    >
+                      <span>{sec.cta.text}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
 
                 {sec.tip && (
                   <div className="mt-3 p-3.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 text-cyan-200 text-xs sm:text-sm flex items-start gap-2.5 ml-4">
@@ -101,9 +197,37 @@ export const BlogView: React.FC<BlogViewProps> = ({
             ))}
           </div>
 
+          {/* Dedicated FAQs section inside the article if present */}
+          {activePost.content.faqs && activePost.content.faqs.length > 0 && (
+            <div className="pt-8 border-t border-slate-800 space-y-4">
+              <div className="flex items-center gap-2">
+                <HelpCircle className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-xl font-bold text-white tracking-tight">
+                  Frequently Asked Questions
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {activePost.content.faqs.map((faq, fIdx) => (
+                  <div
+                    key={fIdx}
+                    className="p-5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-2 hover:border-slate-700 transition-colors"
+                  >
+                    <h4 className="text-sm sm:text-base font-bold text-cyan-300 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+                      <span>{faq.question}</span>
+                    </h4>
+                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed pl-3.5">
+                      {faq.answer}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Conclusion */}
           <div className="pt-6 border-t border-slate-800">
-            <h3 className="text-base font-bold text-white mb-2">Summary & Recommendation</h3>
+            <h3 className="text-base font-bold text-white mb-2">Final Thoughts & Next Steps</h3>
             <p className="text-sm text-slate-300 leading-relaxed mb-6">
               {activePost.content.conclusion}
             </p>

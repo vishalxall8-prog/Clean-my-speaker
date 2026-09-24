@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PageRoute } from '../types';
-import { Volume2, Droplets, Activity, Headphones, HelpCircle, BookOpen, Menu, X, Sliders, Mail, Info } from 'lucide-react';
+import { Volume2, Droplets, Activity, Headphones, HelpCircle, BookOpen, Menu, X, Sliders, Mail, Info, Bot } from 'lucide-react';
 
 interface NavbarProps {
   currentPage: PageRoute;
@@ -12,15 +12,15 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
 
   const navItems: { id: PageRoute; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'home', label: 'Home', icon: <Volume2 className="w-4 h-4" /> },
-    { id: 'speaker-cleaner', label: 'Speaker Cleaner', icon: <Volume2 className="w-4 h-4 text-cyan-400" /> },
     { id: 'water-eject', label: 'Water Eject', icon: <Droplets className="w-4 h-4 text-blue-400" />, badge: 'Popular' },
+    { id: 'ai-chat', label: 'AI Doctor', icon: <Bot className="w-4 h-4 text-purple-400" />, badge: 'Gemini' },
+    { id: 'speaker-cleaner', label: 'Speaker Cleaner', icon: <Volume2 className="w-4 h-4 text-cyan-400" /> },
     { id: 'speaker-test', label: 'Speaker Test', icon: <Activity className="w-4 h-4 text-emerald-400" /> },
     { id: 'left-right-test', label: 'L/R Audio', icon: <Headphones className="w-4 h-4 text-indigo-400" /> },
     { id: 'volume-test', label: 'Volume Test', icon: <Sliders className="w-4 h-4 text-amber-400" /> },
-    { id: 'about', label: 'About', icon: <Info className="w-4 h-4 text-cyan-300" /> },
     { id: 'faq', label: 'FAQ', icon: <HelpCircle className="w-4 h-4 text-slate-400" /> },
-    { id: 'blog', label: 'Guides', icon: <BookOpen className="w-4 h-4 text-slate-400" /> },
-    { id: 'contact', label: 'Contact', icon: <Mail className="w-4 h-4 text-cyan-400" /> },
+    { id: 'blog', label: 'Blog', icon: <BookOpen className="w-4 h-4 text-cyan-400" /> },
+    { id: 'about', label: 'About', icon: <Info className="w-4 h-4 text-cyan-300" /> },
   ];
 
   const handleNav = (page: PageRoute) => {

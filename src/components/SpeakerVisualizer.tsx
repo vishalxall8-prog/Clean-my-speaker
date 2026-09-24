@@ -27,20 +27,23 @@ export const SpeakerVisualizer: React.FC<SpeakerVisualizerProps> = ({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animIdRef = useRef<number | null>(null);
   const particlesRef = useRef<Particle[]>([]);
+  const freqDataRef = useRef<Uint8Array | null>(null);
+  const timeDataRef = useRef<Uint8Array | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
     // Resize canvas to match display pixel ratio
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2 for mobile battery & memory efficiency
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
     };
 
@@ -53,6 +56,8 @@ export const SpeakerVisualizer: React.FC<SpeakerVisualizerProps> = ({
       const rect = canvas.getBoundingClientRect();
       const width = rect.width;
       const height = rect.height;
+      if (width === 0 || height === 0) return;
+
       const centerX = width / 2;
       const centerY = height / 2;
 
@@ -61,27 +66,32 @@ export const SpeakerVisualizer: React.FC<SpeakerVisualizerProps> = ({
       // Get real audio data if playing
       const analyser = audioEngine.getAnalyser();
       let audioPower = 0;
-      let freqData: Uint8Array | null = null;
-      let timeData: Uint8Array | null = null;
+      let freqData = freqDataRef.current;
 
       if (isPlaying && analyser) {
-        freqData = new Uint8Array(analyser.frequencyBinCount);
-        timeData = new Uint8Array(analyser.fftSize);
+        if (!freqDataRef.current || freqDataRef.current.length !== analyser.frequencyBinCount) {
+          freqDataRef.current = new Uint8Array(analyser.frequencyBinCount);
+        }
+        if (!timeDataRef.current || timeDataRef.current.length !== analyser.fftSize) {
+          timeDataRef.current = new Uint8Array(analyser.fftSize);
+        }
+        freqData = freqDataRef.current;
         analyser.getByteFrequencyData(freqData);
-        analyser.getByteTimeDomainData(timeData);
+        analyser.getByteTimeDomainData(timeDataRef.current);
 
         let sum = 0;
-        for (let i = 0; i < freqData.length; i++) {
+        const len = freqData.length;
+        for (let i = 0; i < len; i++) {
           sum += freqData[i];
         }
-        audioPower = sum / (freqData.length * 255);
+        audioPower = sum / (len * 255);
       }
 
-      phase += isPlaying ? 0.08 : 0.02;
+      phase += isPlaying ? 0.08 : 0.01;
 
       // Base radius calculation
       const baseRadius = Math.min(width, height) * 0.22;
-      const dynamicRadius = baseRadius + (isPlaying ? audioPower * 28 : Math.sin(phase) * 2);
+      const dynamicRadius = baseRadius + (isPlaying ? audioPower * 28 : Math.sin(phase) * 1.5);
 
       // 1. Draw outer ripple acoustic rings
       if (isPlaying) {
@@ -101,7 +111,7 @@ export const SpeakerVisualizer: React.FC<SpeakerVisualizerProps> = ({
         }
       }
 
-      // 2. Outer Speaker Chasis Glow
+      // 2. Outer Speaker Chassis Glow
       const glowGrad = ctx.createRadialGradient(
         centerX,
         centerY,
@@ -179,12 +189,12 @@ export const SpeakerVisualizer: React.FC<SpeakerVisualizerProps> = ({
 
       // 6. Realtime Audio Spectrum / Wave around the perimeter
       if (isPlaying && freqData) {
-        const barCount = 36;
+        const barCount = 32;
         const angleStep = (Math.PI * 2) / barCount;
         for (let i = 0; i < barCount; i++) {
           const angle = i * angleStep;
           const dataIndex = Math.floor((i / barCount) * (freqData.length / 2));
-          const barHeight = (freqData[dataIndex] / 255) * 24 + 4;
+          const barHeight = (freqData[dataIndex] / 255) * 22 + 3;
 
           const x1 = centerX + Math.cos(angle) * (dynamicRadius * 1.18);
           const y1 = centerY + Math.sin(angle) * (dynamicRadius * 1.18);
@@ -195,7 +205,7 @@ export const SpeakerVisualizer: React.FC<SpeakerVisualizerProps> = ({
           ctx.moveTo(x1, y1);
           ctx.lineTo(x2, y2);
           ctx.strokeStyle = showDroplets ? '#38bdf8' : '#06b6d4';
-          ctx.lineWidth = 3;
+          ctx.lineWidth = 2.5;
           ctx.lineCap = 'round';
           ctx.stroke();
         }
@@ -203,19 +213,19 @@ export const SpeakerVisualizer: React.FC<SpeakerVisualizerProps> = ({
 
       // 7. Water Particle Ejection FX (when water-eject mode is active)
       if (showDroplets && isPlaying) {
-        // Spawn droplets
-        if (Math.random() < 0.6) {
+        // Cap max droplets at 25 for mobile performance
+        if (particlesRef.current.length < 25 && Math.random() < 0.5) {
           const spawnAngle = Math.random() * Math.PI * 2;
-          const speed = 2 + Math.random() * 4;
+          const speed = 2 + Math.random() * 3.5;
           particlesRef.current.push({
             x: centerX + Math.cos(spawnAngle) * (capRadius * 0.8),
             y: centerY + Math.sin(spawnAngle) * (capRadius * 0.8),
             vx: Math.cos(spawnAngle) * speed,
-            vy: Math.sin(spawnAngle) * speed + 1.2, // slight gravity bias
-            radius: 2 + Math.random() * 3.5,
+            vy: Math.sin(spawnAngle) * speed + 1,
+            radius: 2 + Math.random() * 2.5,
             alpha: 1,
             life: 0,
-            maxLife: 30 + Math.random() * 25,
+            maxLife: 25 + Math.random() * 20,
           });
         }
       }
@@ -233,7 +243,6 @@ export const SpeakerVisualizer: React.FC<SpeakerVisualizerProps> = ({
         ctx.fillStyle = `rgba(186, 230, 253, ${p.alpha * 0.9})`;
         ctx.fill();
 
-        // Droplet specular highlight
         ctx.beginPath();
         ctx.arc(p.x - p.radius * 0.3, p.y - p.radius * 0.3, p.radius * 0.35, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
@@ -244,7 +253,10 @@ export const SpeakerVisualizer: React.FC<SpeakerVisualizerProps> = ({
         }
       }
 
-      animIdRef.current = requestAnimationFrame(render);
+      // Loop only when audio is playing or particles remain; when idle, stop to save CPU & battery
+      if (isPlaying || particlesRef.current.length > 0) {
+        animIdRef.current = requestAnimationFrame(render);
+      }
     };
 
     render();

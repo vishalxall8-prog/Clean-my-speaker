@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Priority Sitemap for Google Search Indexation
+Sitemap: https://cleanmyspeaker.app/sitemap.xml

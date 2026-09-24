@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { audioEngine } from '../lib/audioEngine';
 import { analytics } from '../lib/analytics';
+import { cleaningHistory } from '../lib/cleaningHistory';
+import { viralGrowthEngine } from '../lib/viralGrowthEngine';
+import { haptic } from '../lib/haptics';
 import { SpeakerVisualizer } from './SpeakerVisualizer';
-import { Droplets, Play, Square, Pause, AlertTriangle, ShieldCheck, ArrowDown, HelpCircle, CheckCircle2, RotateCcw } from 'lucide-react';
+import { Droplets, Play, Square, Pause, AlertTriangle, ShieldCheck, ArrowDown, HelpCircle, CheckCircle2, RotateCcw, Share2 } from 'lucide-react';
 
 interface WaterEjectToolProps {
   onNavigateToCleaner?: () => void;
@@ -30,6 +33,7 @@ export const WaterEjectTool: React.FC<WaterEjectToolProps> = ({
   }, []);
 
   const handleStart = async () => {
+    haptic.start();
     await audioEngine.resume();
     setIsCompleted(false);
     setIsPaused(false);
@@ -50,7 +54,13 @@ export const WaterEjectTool: React.FC<WaterEjectToolProps> = ({
           setIsPaused(false);
           setIsCompleted(true);
           setEjectCycleCount((c) => c + 1);
+          haptic.success();
           analytics.track('water_eject_completed', { duration });
+          cleaningHistory.recordSession({
+            toolType: 'water-eject',
+            modeName: '165Hz Water Ejection',
+            durationSeconds: duration,
+          });
           return duration;
         }
         return prev - 1;
@@ -59,6 +69,7 @@ export const WaterEjectTool: React.FC<WaterEjectToolProps> = ({
   };
 
   const handlePause = () => {
+    haptic.stop();
     if (timerRef.current) clearInterval(timerRef.current);
     audioEngine.stop();
     setIsPlaying(false);
@@ -66,6 +77,7 @@ export const WaterEjectTool: React.FC<WaterEjectToolProps> = ({
   };
 
   const handleResume = async () => {
+    haptic.start();
     await audioEngine.resume();
     setIsPlaying(true);
     setIsPaused(false);
@@ -80,6 +92,13 @@ export const WaterEjectTool: React.FC<WaterEjectToolProps> = ({
           setIsPaused(false);
           setIsCompleted(true);
           setEjectCycleCount((c) => c + 1);
+          haptic.success();
+          analytics.track('water_eject_completed', { duration });
+          cleaningHistory.recordSession({
+            toolType: 'water-eject',
+            modeName: '165Hz Water Ejection',
+            durationSeconds: duration,
+          });
           return duration;
         }
         return prev - 1;
@@ -88,6 +107,7 @@ export const WaterEjectTool: React.FC<WaterEjectToolProps> = ({
   };
 
   const handleStop = () => {
+    haptic.stop();
     if (timerRef.current) clearInterval(timerRef.current);
     audioEngine.stop();
     setIsPlaying(false);
@@ -176,12 +196,82 @@ export const WaterEjectTool: React.FC<WaterEjectToolProps> = ({
             </p>
           </div>
 
-          {/* Progress Bar */}
-          <div className="w-full max-w-md bg-slate-950 rounded-full h-2 mt-4 overflow-hidden border border-slate-800">
+          {/* Active Water Eject Cycle Progress Bar */}
+          <div className="w-full max-w-lg mt-5 p-3.5 sm:p-4 rounded-2xl bg-slate-950/80 border border-slate-800 shadow-inner space-y-2.5">
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-1.5 font-semibold text-slate-300">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isPlaying
+                      ? 'bg-blue-400 animate-ping'
+                      : isPaused
+                      ? 'bg-amber-400'
+                      : isCompleted
+                      ? 'bg-emerald-400'
+                      : 'bg-slate-600'
+                  }`}
+                />
+                <span className="text-slate-200">
+                  {isPlaying
+                    ? 'Active Water Expulsion'
+                    : isPaused
+                    ? 'Ejection Paused'
+                    : isCompleted
+                    ? 'Ejection Complete'
+                    : 'Water Ejection Progress'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-blue-300 font-bold">
+                  {Math.round(progressPercentage)}%
+                </span>
+                <span className="text-slate-600">•</span>
+                <span className="font-mono text-slate-300 font-medium">
+                  <strong className="text-blue-300">{timeLeft}s</strong> remaining
+                </span>
+              </div>
+            </div>
+
             <div
-              className="bg-gradient-to-r from-blue-500 via-cyan-400 to-sky-300 h-full transition-all duration-300 rounded-full"
-              style={{ width: `${progressPercentage}%` }}
-            />
+              className="relative w-full bg-slate-900 rounded-full h-3.5 overflow-hidden border border-slate-800/80 p-0.5"
+              role="progressbar"
+              aria-valuenow={Math.round(progressPercentage)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Water ejection remaining time"
+            >
+              <div
+                className="relative bg-gradient-to-r from-blue-500 via-cyan-400 to-sky-300 h-full rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(59,130,246,0.5)]"
+                style={{ width: `${progressPercentage}%` }}
+              >
+                {isPlaying && (
+                  <div className="absolute inset-0 bg-white/25 animate-pulse rounded-full" />
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium pt-0.5">
+              <span>Elapsed: {duration - timeLeft}s of {duration}s</span>
+              <span className="flex items-center gap-1">
+                <span>Time Remaining:</span>
+                <span className="font-mono font-bold text-blue-300">{timeLeft}s</span>
+              </span>
+            </div>
+
+            {/* Quick 1-Tap 'Clean Again' Trigger inside Progress Bar Area */}
+            {isCompleted && !isPlaying && (
+              <div className="pt-2 border-t border-slate-800/80 animate-in fade-in slide-in-from-top-2 duration-200">
+                <button
+                  id="water-eject-clean-again-btn"
+                  onClick={handleStart}
+                  className="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-500 hover:from-blue-500 hover:to-cyan-400 shadow-md shadow-blue-900/30 flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer"
+                  title="One-tap quick restart of the water ejection tone"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Clean Again (Eject Water 165Hz)</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -262,17 +352,28 @@ export const WaterEjectTool: React.FC<WaterEjectToolProps> = ({
                 <p className="text-xs text-slate-300 mt-1 leading-relaxed">
                   Dab any liquid micro-droplets on the exterior with a microfiber cloth. If your speaker still sounds slightly muffled, wait 15 seconds and run a second cycle.
                 </p>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
+                <div className="mt-3.5 flex flex-wrap items-center gap-2">
                   <button
                     onClick={handleStart}
-                    className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-500 transition-colors"
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-500 transition-colors cursor-pointer"
                   >
                     Run Another Cycle
+                  </button>
+                  <button
+                    onClick={() => viralGrowthEngine.shareNative({
+                      title: 'Clean My Speaker — 165Hz Water Eject Tool',
+                      text: '💦 Dropped your phone in water or coffee? Use this free 165Hz water eject sound to push droplets out of your speaker grille:',
+                      url: viralGrowthEngine.getShareUrl('copy'),
+                    })}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white shadow-md shadow-cyan-950/40 transition-colors cursor-pointer"
+                  >
+                    <Share2 className="w-3.5 h-3.5" />
+                    <span>Share Water Eject Tool</span>
                   </button>
                   {onNavigateToTest && (
                     <button
                       onClick={onNavigateToTest}
-                      className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-slate-800"
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 cursor-pointer"
                     >
                       Test Sound Clarity
                     </button>
