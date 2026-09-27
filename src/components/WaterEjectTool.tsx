@@ -4,6 +4,7 @@ import { analytics } from '../lib/analytics';
 import { cleaningHistory } from '../lib/cleaningHistory';
 import { viralGrowthEngine } from '../lib/viralGrowthEngine';
 import { haptic } from '../lib/haptics';
+import { triggerConfetti } from '../lib/confetti';
 import { SpeakerVisualizer } from './SpeakerVisualizer';
 import { Droplets, Play, Square, Pause, AlertTriangle, ShieldCheck, ArrowDown, HelpCircle, CheckCircle2, RotateCcw, Share2 } from 'lucide-react';
 
@@ -55,6 +56,7 @@ export const WaterEjectTool: React.FC<WaterEjectToolProps> = ({
           setIsCompleted(true);
           setEjectCycleCount((c) => c + 1);
           haptic.success();
+          triggerConfetti({ particleCount: 85, originY: 0.55 });
           analytics.track('water_eject_completed', { duration });
           cleaningHistory.recordSession({
             toolType: 'water-eject',
@@ -93,6 +95,7 @@ export const WaterEjectTool: React.FC<WaterEjectToolProps> = ({
           setIsCompleted(true);
           setEjectCycleCount((c) => c + 1);
           haptic.success();
+          triggerConfetti({ particleCount: 85, originY: 0.55 });
           analytics.track('water_eject_completed', { duration });
           cleaningHistory.recordSession({
             toolType: 'water-eject',

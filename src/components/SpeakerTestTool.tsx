@@ -3,6 +3,8 @@ import { FrequencyBand } from '../types';
 import { FREQUENCY_PRESETS } from '../data/content';
 import { audioEngine } from '../lib/audioEngine';
 import { analytics } from '../lib/analytics';
+import { haptic } from '../lib/haptics';
+import { FrequencyWaveformVisualizer } from './FrequencyWaveformVisualizer';
 import { Play, Square, Activity, Volume2, Sliders, Waves, Gauge, Check, Info } from 'lucide-react';
 
 export const SpeakerTestTool: React.FC = () => {
@@ -21,6 +23,7 @@ export const SpeakerTestTool: React.FC = () => {
   }, []);
 
   const handlePlayPreset = async (presetId: FrequencyBand) => {
+    haptic.start();
     await audioEngine.resume();
     setActiveBand(presetId);
 
@@ -35,6 +38,7 @@ export const SpeakerTestTool: React.FC = () => {
         setSweepHz(hz);
         if (prog >= 1) {
           setIsPlaying(false);
+          haptic.success();
           analytics.track('speaker_test_sweep_completed');
         }
       });
@@ -56,6 +60,7 @@ export const SpeakerTestTool: React.FC = () => {
   };
 
   const handleWaveTypeChange = (type: OscillatorType) => {
+    haptic.light();
     setWaveType(type);
     if (isPlaying && activeBand !== 'sweep') {
       audioEngine.playTone(customHz, type);
@@ -63,6 +68,7 @@ export const SpeakerTestTool: React.FC = () => {
   };
 
   const handleStop = () => {
+    haptic.stop();
     audioEngine.stop();
     setIsPlaying(false);
     setSweepProgress(0);
@@ -135,6 +141,20 @@ export const SpeakerTestTool: React.FC = () => {
               />
             </div>
           )}
+        </div>
+
+        {/* Real-time Oscilloscope Waveform & Audio Output Confirmation Canvas */}
+        <div className="mt-4">
+          <FrequencyWaveformVisualizer
+            isPlaying={isPlaying}
+            frequencyHz={activeBand === 'sweep' ? sweepHz : customHz}
+            waveType={waveType}
+            label={
+              activeBand === 'sweep'
+                ? `Logarithmic Sweep: ${sweepHz} Hz`
+                : `${currentPreset?.name || 'Custom'} (${customHz} Hz ${waveType})`
+            }
+          />
         </div>
 
         {/* Frequency Band Presets */}

@@ -6,6 +6,7 @@ import { analytics } from '../lib/analytics';
 import { cleaningHistory } from '../lib/cleaningHistory';
 import { viralGrowthEngine } from '../lib/viralGrowthEngine';
 import { haptic } from '../lib/haptics';
+import { triggerConfetti } from '../lib/confetti';
 import { SpeakerVisualizer } from './SpeakerVisualizer';
 import { Play, Pause, Square, Sparkles, AlertTriangle, CheckCircle2, RotateCcw, Volume2, ShieldAlert, Zap, Activity, Shield, Share2 } from 'lucide-react';
 
@@ -67,6 +68,7 @@ export const SpeakerCleanerTool: React.FC<SpeakerCleanerToolProps> = ({
           setIsPaused(false);
           setIsCompleted(true);
           haptic.success();
+          triggerConfetti({ particleCount: 85, originY: 0.55 });
           analytics.track('cleaner_completed', { mode: selectedMode, duration });
           cleaningHistory.recordSession({
             toolType: 'speaker-cleaner',
@@ -107,6 +109,7 @@ export const SpeakerCleanerTool: React.FC<SpeakerCleanerToolProps> = ({
           setIsPaused(false);
           setIsCompleted(true);
           haptic.success();
+          triggerConfetti({ particleCount: 85, originY: 0.55 });
           analytics.track('cleaner_completed', { mode: selectedMode, duration });
           cleaningHistory.recordSession({
             toolType: 'speaker-cleaner',
