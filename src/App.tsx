@@ -20,6 +20,8 @@ import { AboutView } from './components/AboutView';
 import { PrivacyPolicyView } from './components/PrivacyPolicyView';
 import { TermsView } from './components/TermsView';
 import { DisclaimerView } from './components/DisclaimerView';
+import { NotFoundView } from './components/NotFoundView';
+import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { AuthoritativeContentSection } from './components/AuthoritativeContentSection';
 import { AIChatView } from './components/AIChatView';
 import { FloatingAIChatWidget } from './components/FloatingAIChatWidget';
@@ -87,12 +89,18 @@ export default function App() {
           'privacy',
           'terms',
           'disclaimer',
+          'guide',
+          '404',
         ].includes(target)
       ) {
         setCurrentPage(target as PageRoute);
         setBlogSlug(undefined);
-      } else {
+      } else if (!target || target === '' || target === 'home') {
         setCurrentPage('home');
+        setBlogSlug(undefined);
+      } else {
+        // Unknown route -> render custom 404 page
+        setCurrentPage('404');
         setBlogSlug(undefined);
       }
     };
@@ -205,9 +213,6 @@ export default function App() {
 
             {/* Non-intrusive Top Banner Ad */}
             <AdSlot id="home-ad-top" format="banner" />
-
-            {/* SEO-RICH COMPREHENSIVE HINDI GUIDE */}
-            <HindiSpeakerGuide />
 
             {/* HOW IT WORKS SECTION */}
             <section id="how-it-works-section" className="w-full max-w-5xl mx-auto">
@@ -475,8 +480,31 @@ export default function App() {
             {/* AUTHORITATIVE ACOUSTIC & HARDWARE CARE GUIDE (E-E-A-T) */}
             <AuthoritativeContentSection onNavigate={(p) => navigateTo(p)} />
 
-            {/* HINDI SPEAKER CLEANING GUIDE */}
-            <HindiSpeakerGuide />
+            {/* MASTER GUIDE CTA CARD */}
+            <section id="master-guide-preview-card" className="w-full max-w-5xl mx-auto">
+              <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-cyan-950/40 to-slate-900 border border-cyan-800/40 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
+                <div className="space-y-2 text-center sm:text-left">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-semibold">
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>English &amp; हिन्दी Audio Guide</span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white">
+                    Need Step-by-Step Instructions &amp; Safe Care Protocols?
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                    Read our complete guide covering how sound waves agitate pocket dust and safely eject water droplets without needles or heat. Available in both English and Hindi.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('guide')}
+                  className="shrink-0 px-6 py-3.5 rounded-xl font-bold text-sm bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-500/20 transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+                >
+                  <span>Read Complete Guide</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </section>
 
             {/* SAFETY INFORMATION SECTION */}
             <SafetyNotice />
@@ -557,7 +585,6 @@ export default function App() {
 
             <SpeakerCleanerTool onNavigateToTest={() => navigateTo('speaker-test')} />
             <AdSlot id="cleaner-page-ad" format="banner" />
-            <HindiSpeakerGuide />
             <SafetyNotice />
           </div>
         )}
@@ -704,6 +731,19 @@ export default function App() {
         {currentPage === 'disclaimer' && (
           <DisclaimerView onNavigate={(p) => navigateTo(p)} />
         )}
+
+        {/* DEDICATED MASTER GUIDE (ENGLISH & HINDI) ROUTE */}
+        {currentPage === 'guide' && (
+          <div className="space-y-10">
+            <HindiSpeakerGuide />
+            <SafetyNotice />
+          </div>
+        )}
+
+        {/* CUSTOM 404 NOT FOUND ROUTE */}
+        {currentPage === '404' && (
+          <NotFoundView onNavigate={(p) => navigateTo(p)} />
+        )}
       </main>
 
       {/* Main Footer */}
@@ -711,6 +751,9 @@ export default function App() {
 
       {/* Floating AI Chat Assistant Widget */}
       <FloatingAIChatWidget currentPage={currentPage} onNavigate={navigateTo} />
+
+      {/* GDPR / CCPA Cookie Consent Banner */}
+      <CookieConsentBanner onNavigate={(p) => navigateTo(p)} />
     </div>
   );
 }

@@ -25,6 +25,9 @@ export const ContactView: React.FC<ContactViewProps> = ({ onNavigate }) => {
   const [subject, setSubject] = useState('');
   const [category, setCategory] = useState('general');
   const [message, setMessage] = useState('');
+  const [honeypot, setHoneypot] = useState(''); // Anti-bot honeypot
+  const [mathAnswer, setMathAnswer] = useState('');
+  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string; math?: string }>({});
   const [submitted, setSubmitted] = useState(false);
 
   const handleCopyEmail = () => {
@@ -36,9 +39,46 @@ export const ContactView: React.FC<ContactViewProps> = ({ onNavigate }) => {
     }
   };
 
+  const validateForm = (): boolean => {
+    const errs: { name?: string; email?: string; message?: string; math?: string } = {};
+
+    if (!name.trim()) {
+      errs.name = 'Please provide your name.';
+    } else if (name.trim().length < 2) {
+      errs.name = 'Name must be at least 2 characters.';
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim()) {
+      errs.email = 'Please provide your email address.';
+    } else if (!emailRegex.test(email.trim())) {
+      errs.email = 'Please enter a valid email address (e.g. name@domain.com).';
+    }
+
+    if (!message.trim()) {
+      errs.message = 'Please enter your message.';
+    } else if (message.trim().length < 15) {
+      errs.message = 'Message must be at least 15 characters so we can assist you effectively.';
+    }
+
+    if (mathAnswer.trim() !== '9') {
+      errs.math = 'Please answer the anti-spam verification: 5 + 4 = 9.';
+    }
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+
+    // Spam honeypot detection: bots automatically fill hidden inputs
+    if (honeypot.trim()) {
+      console.warn('Bot submission blocked via honeypot.');
+      return;
+    }
+
+    if (!validateForm()) return;
 
     // Compose a mailto link so the user's native email client opens with all fields populated
     const mailSubject = encodeURIComponent(`[CleanMySpeaker - ${category.toUpperCase()}] ${subject || 'User Query'}`);
@@ -215,31 +255,60 @@ export const ContactView: React.FC<ContactViewProps> = ({ onNavigate }) => {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Honeypot field (hidden from genuine users, filled by spam bots) */}
+                <div className="hidden" aria-hidden="true" style={{ display: 'none' }}>
+                  <label htmlFor="website-url-check">Leave this empty</label>
+                  <input
+                    id="website-url-check"
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                      Your Name
+                      Your Name <span className="text-cyan-400">*</span>
                     </label>
                     <input
                       type="text"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
+                      }}
                       placeholder="e.g. Alex Kumar"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                      className={`w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border text-slate-100 text-sm focus:outline-none transition-colors ${
+                        errors.name ? 'border-rose-500 focus:border-rose-400' : 'border-slate-800 focus:border-cyan-500'
+                      }`}
                     />
+                    {errors.name && (
+                      <p className="text-[11px] text-rose-400 mt-1">{errors.name}</p>
+                    )}
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                      Your Email Address
+                      Your Email Address <span className="text-cyan-400">*</span>
                     </label>
                     <input
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+                      }}
                       placeholder="your.email@example.com"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                      className={`w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border text-slate-100 text-sm focus:outline-none transition-colors ${
+                        errors.email ? 'border-rose-500 focus:border-rose-400' : 'border-slate-800 focus:border-cyan-500'
+                      }`}
                     />
+                    {errors.email && (
+                      <p className="text-[11px] text-rose-400 mt-1">{errors.email}</p>
+                    )}
                   </div>
                 </div>
 
@@ -280,14 +349,51 @@ export const ContactView: React.FC<ContactViewProps> = ({ onNavigate }) => {
                     Your Message <span className="text-cyan-400">*</span>
                   </label>
                   <textarea
-                    required
                     rows={5}
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Describe your query, phone model, or suggestion here in detail..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors resize-y leading-relaxed"
+                    onChange={(e) => {
+                      setMessage(e.target.value);
+                      if (errors.message) setErrors((prev) => ({ ...prev, message: undefined }));
+                    }}
+                    placeholder="Describe your query, phone model, or suggestion here in detail (minimum 15 characters)..."
+                    className={`w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border text-slate-100 text-sm focus:outline-none transition-colors resize-y leading-relaxed ${
+                      errors.message ? 'border-rose-500 focus:border-rose-400' : 'border-slate-800 focus:border-cyan-500'
+                    }`}
                   />
+                  {errors.message && (
+                    <p className="text-[11px] text-rose-400 mt-1">{errors.message}</p>
+                  )}
                 </div>
+
+                {/* Anti-spam Verification Challenge */}
+                <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-semibold text-slate-200 block">
+                      Spam Protection Verification <span className="text-cyan-400">*</span>
+                    </span>
+                    <span className="text-[11px] text-slate-400">
+                      What is <strong className="text-cyan-300 font-mono">5 + 4</strong>? (Enter digit to verify you are human)
+                    </span>
+                  </div>
+                  <div className="w-24">
+                    <input
+                      type="text"
+                      maxLength={2}
+                      value={mathAnswer}
+                      onChange={(e) => {
+                        setMathAnswer(e.target.value);
+                        if (errors.math) setErrors((prev) => ({ ...prev, math: undefined }));
+                      }}
+                      placeholder="?"
+                      className={`w-full px-3 py-1.5 text-center font-mono font-bold rounded-lg bg-slate-900 border text-white text-sm focus:outline-none ${
+                        errors.math ? 'border-rose-500 focus:border-rose-400' : 'border-slate-700 focus:border-cyan-500'
+                      }`}
+                    />
+                  </div>
+                </div>
+                {errors.math && (
+                  <p className="text-[11px] text-rose-400">{errors.math}</p>
+                )}
 
                 <button
                   type="submit"

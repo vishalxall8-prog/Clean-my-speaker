@@ -101,11 +101,20 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <ul className="space-y-2 text-xs">
               <li>
                 <button
-                  onClick={() => onNavigate('blog')}
+                  onClick={() => onNavigate('guide')}
                   className="hover:text-cyan-300 transition-colors flex items-center gap-1.5 text-cyan-400 font-semibold"
                 >
                   <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Blog & Audio Guides</span>
+                  <span>Master Guide (EN &amp; HI)</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('blog')}
+                  className="hover:text-cyan-300 transition-colors flex items-center gap-1.5 text-slate-300"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Blog &amp; Audio Articles</span>
                 </button>
               </li>
               <li>

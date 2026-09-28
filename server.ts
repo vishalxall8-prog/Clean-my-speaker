@@ -14,6 +14,23 @@ async function startServer() {
   const app = express();
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
+  // Security & HTTPS enforcement middleware
+  app.use((req, res, next) => {
+    // Check standard reverse proxy header for HTTPS
+    const proto = req.headers['x-forwarded-proto'];
+    if (proto && proto !== 'https' && process.env.NODE_ENV === 'production') {
+      return res.redirect(301, `https://${req.headers.host}${req.url}`);
+    }
+
+    // Modern Security Headers
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    next();
+  });
+
   app.use(express.json({ limit: '5mb' }));
 
   // Gemini API client

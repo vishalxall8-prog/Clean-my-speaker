@@ -28,8 +28,13 @@ export const FrequencyWaveformVisualizer: React.FC<FrequencyWaveformVisualizerPr
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
+    let width = 0;
+    let height = 0;
+
     const handleResize = () => {
       const rect = canvas.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
@@ -38,15 +43,11 @@ export const FrequencyWaveformVisualizer: React.FC<FrequencyWaveformVisualizerPr
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
 
     let idlePhase = 0;
 
     const draw = () => {
-      const rect = canvas.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
-
       if (width === 0 || height === 0) {
         animFrameRef.current = requestAnimationFrame(draw);
         return;

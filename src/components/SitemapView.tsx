@@ -27,6 +27,7 @@ export const SitemapView: React.FC<SitemapViewProps> = ({ onNavigate, onSelectBl
     { path: '/privacy', name: 'Privacy Policy', page: 'privacy', changefreq: 'monthly', priority: '0.6', desc: 'GDPR, CCPA, and Google AdSense cookie compliance documentation.' },
     { path: '/terms', name: 'Terms of Service', page: 'terms', changefreq: 'monthly', priority: '0.6', desc: 'Conditions of use and terms governing CleanMySpeaker acoustic utilities.' },
     { path: '/disclaimer', name: 'Safety & Hardware Disclaimer', page: 'disclaimer', changefreq: 'monthly', priority: '0.6', desc: 'Hearing safety guidelines and acoustic physics hardware limitations.' },
+    { path: '/guide', name: 'Speaker Cleaning Master Guide (EN & HI)', page: 'guide', changefreq: 'monthly', priority: '0.8', desc: 'Detailed step-by-step master guide for phone water and dust removal in English and Hindi.' },
   ];
 
   const xmlSitemapContent = `<?xml version="1.0" encoding="UTF-8"?>

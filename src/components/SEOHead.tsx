@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { PageRoute } from '../types';
 import { BLOG_POSTS, FAQ_DATA } from '../data/content';
+import { trackPageView } from '../utils/analytics';
 
 interface SEOHeadProps {
   page: PageRoute;
@@ -202,6 +203,14 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ page, blogSlug }) => {
       title = 'Disclaimer & Safety Warning — CleanMySpeaker';
       description = 'Important acoustic safety guidelines, hearing protection advice, and hardware limitations for CleanMySpeaker.';
       canonical = 'https://cleanmyspeaker.app/disclaimer';
+    } else if (page === 'guide') {
+      title = 'Comprehensive Phone Speaker Cleaning & Water Eject Guide | CleanMySpeaker';
+      description = 'Step-by-step master guide in English and Hindi on removing trapped moisture and dust from phone speakers using 165Hz sound waves.';
+      canonical = 'https://cleanmyspeaker.app/guide';
+    } else if (page === '404') {
+      title = '404 - Page Not Found | CleanMySpeaker';
+      description = 'The requested audio diagnostic tool or guide could not be found. Return to CleanMySpeaker to eject water and clean speakers.';
+      canonical = 'https://cleanmyspeaker.app/404';
     }
 
     // Update document head
@@ -254,6 +263,9 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ page, blogSlug }) => {
       document.head.appendChild(schemaScript);
     }
     schemaScript.textContent = JSON.stringify(jsonLd);
+
+    // Privacy-compliant page view event tracking
+    trackPageView(canonical, title);
   }, [page, blogSlug]);
 
   return null;

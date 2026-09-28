@@ -91,3 +91,11 @@
   box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.35);
 }
 
+/* GPU Hardware Acceleration for smooth 60fps animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+

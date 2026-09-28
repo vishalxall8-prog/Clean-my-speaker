@@ -14,7 +14,9 @@ export type PageRoute =
   | 'about'
   | 'privacy'
   | 'terms'
-  | 'disclaimer';
+  | 'disclaimer'
+  | 'guide'
+  | '404';
 
 export interface ChatSource {
   title: string;

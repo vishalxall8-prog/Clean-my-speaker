@@ -56,8 +56,8 @@ export const HindiSpeakerGuide: React.FC = () => {
               <BookOpen className="w-3.5 h-3.5" />
               <span>
                 {lang === 'en'
-                  ? 'Worldwide SEO Master Guide • 1200+ Words'
-                  : 'SEO संपूर्ण गाइड • 1000+ Words Quality Guide'}
+                  ? 'Master Phone Audio Guide'
+                  : 'संपूर्ण फोन ऑडियो गाइड'}
               </span>
             </div>
 

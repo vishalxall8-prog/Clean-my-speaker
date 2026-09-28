@@ -38,8 +38,13 @@ export const SpeakerVisualizer: React.FC<SpeakerVisualizerProps> = ({
     if (!ctx) return;
 
     // Resize canvas to match display pixel ratio
+    let width = 0;
+    let height = 0;
+
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
       const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2 for mobile battery & memory efficiency
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
@@ -48,15 +53,17 @@ export const SpeakerVisualizer: React.FC<SpeakerVisualizerProps> = ({
     };
 
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas, { passive: true });
 
     let phase = 0;
 
     const render = () => {
-      const rect = canvas.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
-      if (width === 0 || height === 0) return;
+      if (width === 0 || height === 0) {
+        if (isPlaying || particlesRef.current.length > 0) {
+          animIdRef.current = requestAnimationFrame(render);
+        }
+        return;
+      }
 
       const centerX = width / 2;
       const centerY = height / 2;

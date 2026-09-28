@@ -36,8 +36,17 @@ export const viralGrowthEngine = {
         return JSON.parse(stored);
       }
 
+      let refHost = 'direct';
+      try {
+        if (document.referrer) {
+          refHost = new URL(document.referrer).hostname;
+        }
+      } catch {
+        refHost = 'external';
+      }
+
       const urlParams = new URLSearchParams(window.location.search);
-      const utmSource = urlParams.get('utm_source') || (document.referrer ? new URL(document.referrer).hostname : 'direct');
+      const utmSource = urlParams.get('utm_source') || refHost;
       const utmMedium = urlParams.get('utm_medium') || 'organic';
       const utmCampaign = urlParams.get('utm_campaign') || 'clean_my_speaker';
       const refCode = urlParams.get('ref') || undefined;

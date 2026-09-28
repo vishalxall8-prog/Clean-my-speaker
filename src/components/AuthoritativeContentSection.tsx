@@ -43,19 +43,19 @@ export const AuthoritativeContentSection: React.FC<AuthoritativeContentSectionPr
             <div className="w-10 h-10 rounded-xl bg-cyan-950/80 border border-cyan-800/60 flex items-center justify-center text-cyan-400">
               <Cpu className="w-5 h-5" />
             </div>
-            <h3 className="text-xl font-bold text-white">
+            <h3 className="text-lg sm:text-xl font-bold text-white">
               The 165Hz Acoustic Resonance Principle
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Smartphone micro-speakers differ drastically from large home hi-fi speakers. Measuring merely 12mm to 16mm in diameter, micro-transducers rely on tight mechanical suspensions with a natural mechanical resonant frequency typically clustered between <strong>150 Hz and 180 Hz</strong>.
+              Smartphone micro-speakers (12mm–16mm) have a natural mechanical resonant frequency between <strong>150 Hz and 180 Hz</strong>.
             </p>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              When our tool synthesizes a 165Hz tone with modulated square pulse waves, it excites the speaker’s voice coil and silicone-wrapped diaphragm at its natural resonance point. This maximizes physical cone displacement (excursion) while consuming minimal electrical wattage, effectively turning the speaker into a miniature pneumatic pump that drives air outward through the speaker grille.
+              Synthesizing 165Hz pulsed tones maximizes cone excursion with minimal power, creating a gentle air current that propels trapped dust and moisture outward through the speaker grille.
             </p>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800/80 text-xs text-cyan-300 flex items-center gap-3">
+          <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 text-xs text-cyan-300 flex items-center gap-3">
             <Sparkles className="w-4 h-4 shrink-0 text-cyan-400" />
-            <span>High acoustic velocity pushes trapped moisture outward rather than sucking it deeper into the acoustic chamber.</span>
+            <span>Pushes trapped moisture outward safely without pulling it deeper into internal cavities.</span>
           </div>
         </div>
 
@@ -64,19 +64,19 @@ export const AuthoritativeContentSection: React.FC<AuthoritativeContentSectionPr
             <div className="w-10 h-10 rounded-xl bg-blue-950/80 border border-blue-800/60 flex items-center justify-center text-blue-400">
               <Droplets className="w-5 h-5" />
             </div>
-            <h3 className="text-xl font-bold text-white">
-              Overcoming Liquid Surface Tension (Capillarity)
+            <h3 className="text-lg sm:text-xl font-bold text-white">
+              Overcoming Surface Tension (Capillarity)
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Why does your speaker sound distant and muffled after being dropped in water, even if your phone is rated IP68? Water does not always leak inside; rather, water droplets lodge in the microscopic laser-cut openings of the external speaker grille due to high surface tension.
+              When phones get wet, water droplets lodge in the microscopic speaker mesh holes due to capillary surface tension, creating an acoustic barrier that muffles sound.
             </p>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              This liquid film acts as an acoustic barrier, absorbing high-frequency sound waves and muffling calls. Our rapid 6Hz square-wave amplitude modulation subjects the droplet's meniscus to rapid pressure alternations, breaking the capillary adhesion holding the liquid to the metal mesh and freeing the droplets to roll off.
+              Rapid 6Hz amplitude modulation shakes the droplet surface, breaking the capillary hold and allowing water droplets to roll out onto a cloth.
             </p>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800/80 text-xs text-blue-300 flex items-center gap-3">
+          <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 text-xs text-blue-300 flex items-center gap-3">
             <Activity className="w-4 h-4 shrink-0 text-blue-400" />
-            <span>Works on the same acoustic expulsion mechanism popularized by modern smartwatches with water-lock features.</span>
+            <span>Uses the same acoustic expulsion principle found in modern smartwatches with water-lock.</span>
           </div>
         </div>
       </div>
