@@ -10,6 +10,23 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Close on ESC key and prevent background scroll lag when open
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    if (mobileMenuOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   const navItems: { id: PageRoute; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'home', label: 'Home', icon: <Volume2 className="w-4 h-4" /> },
     { id: 'water-eject', label: 'Water Eject', icon: <Droplets className="w-4 h-4 text-blue-400" />, badge: 'Popular' },
@@ -107,51 +124,67 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer & Backdrop */}
       {mobileMenuOpen && (
-        <div
-          id="mobile-drawer"
-          className="lg:hidden bg-[#0e1420] border-b border-slate-800 px-4 pt-3 pb-6 space-y-2 shadow-2xl animate-in slide-in-from-top duration-200"
-        >
-          <div className="grid grid-cols-1 gap-1">
-            {navItems.map((item) => {
-              const isActive = currentPage === item.id;
-              return (
-                <button
-                  key={item.id}
-                  id={`mobile-nav-btn-${item.id}`}
-                  onClick={() => handleNav(item.id)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-colors ${
-                    isActive
-                      ? 'bg-slate-800 text-cyan-300 border border-slate-700'
-                      : 'text-slate-200 hover:bg-slate-800/50'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span className="text-xs uppercase font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+        <>
+          {/* Backdrop to close menu when tapping outside (solid dark tint without heavy blur for 60fps GPU performance) */}
+          <div
+            className="fixed inset-0 top-16 sm:top-20 bg-slate-950/85 z-40 lg:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
 
-          <div className="pt-2">
-            <button
-              id="mobile-drawer-eject-btn"
-              onClick={() => handleNav('water-eject')}
-              className="w-full py-3 rounded-xl font-semibold text-center flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/20"
-            >
-              <Droplets className="w-5 h-5" />
-              <span>Water Eject Mode</span>
-            </button>
+          <div
+            id="mobile-drawer"
+            className="relative z-50 lg:hidden bg-[#0c121d] border-b border-slate-800 px-4 pt-3 pb-8 space-y-3 shadow-2xl max-h-[calc(100dvh-4.5rem)] overflow-y-auto overscroll-contain gpu-accelerated touch-pan-y"
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              touchAction: 'pan-y',
+            }}
+          >
+            <div className="grid grid-cols-1 gap-1.5">
+              {navItems.map((item) => {
+                const isActive = currentPage === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    id={`mobile-nav-btn-${item.id}`}
+                    onClick={() => handleNav(item.id)}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-colors cursor-pointer text-left ${
+                      isActive
+                        ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
+                        : 'text-slate-200 hover:bg-slate-800/80 active:bg-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="p-1 rounded-lg bg-slate-800/60 shrink-0">{item.icon}</span>
+                      <span className="font-medium">{item.label}</span>
+                    </div>
+                    {item.badge && (
+                      <span className="text-xs uppercase font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-3 pb-2 border-t border-slate-800/80 space-y-2">
+              <button
+                id="mobile-drawer-eject-btn"
+                onClick={() => handleNav('water-eject')}
+                className="w-full py-3.5 rounded-xl font-bold text-center flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-400 text-white shadow-lg shadow-cyan-500/25 active:scale-[0.99] transition-transform cursor-pointer"
+              >
+                <Droplets className="w-5 h-5" />
+                <span>Water Eject (165Hz Instant)</span>
+              </button>
+              <p className="text-center text-[11px] text-slate-400 pt-1">
+                Tap any option above to navigate • Tap outside or ✕ to close
+              </p>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </header>
   );
