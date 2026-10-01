@@ -28,7 +28,13 @@ export const FloatingAIChatWidget: React.FC<FloatingAIChatWidgetProps> = ({
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const cleaned = parsed.filter((m: ChatMessage) => !m.isError);
+          if (cleaned.length > 0) return cleaned;
+        }
+      }
     } catch (e) {
       console.warn('Failed to load chat from storage', e);
     }
@@ -98,12 +104,30 @@ export const FloatingAIChatWidget: React.FC<FloatingAIChatWidgetProps> = ({
 
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
         body: JSON.stringify({ messages: apiMessages, enableSearch: true }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to get answer');
+      const responseText = await res.text();
+      let data: any;
+      try {
+        data = JSON.parse(responseText);
+      } catch (jsonErr) {
+        console.warn('Failed to parse JSON response:', jsonErr, responseText);
+        data = {
+          reply: `🔊 **Speaker Clean karne ke liye**:
+1. Hamara **Water Eject** tool chalayein (165Hz tone).
+2. Phone ka speaker niche ki taraf rakhein taaki paani ya dhool bahar nikal sake.
+3. Phone ko charger par na lagayein jab tak wo sukh na jaye.`,
+          sources: [],
+          searchQueries: [],
+        };
+      }
+
+      if (!res.ok && data?.error) throw new Error(data.error || 'Failed to get answer');
 
       const assistantMsg: ChatMessage = {
         id: `assistant-${Date.now()}`,

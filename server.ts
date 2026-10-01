@@ -46,6 +46,13 @@ async function startServer() {
       })
     : null;
 
+  // Favicon route (supports browsers requesting /favicon.ico or /favicon.svg directly)
+  app.get(['/favicon.ico', '/favicon.svg'], (_req, res) => {
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.sendFile(path.resolve(__dirname, 'public', 'favicon.svg'));
+  });
+
   // Health check
   app.get('/api/health', (_req, res) => {
     res.json({
@@ -85,85 +92,107 @@ async function startServer() {
       }
 
       const systemInstruction = `You are CleanMySpeaker AI — an expert phone audio, speaker acoustics, and water expulsion diagnostic specialist.
-Your mission is to provide accurate, safe, scientifically sound, and up-to-date guidance on:
+Language capabilities:
+- Respond in the user's language. If the user asks in Hindi or Hinglish (e.g. "Kya", "Kese theek kare", "Paani nikalna hai"), reply in clear, friendly, natural Hindi / Hinglish.
+- If the user asks in English, reply in English.
+
+Your mission is to provide accurate, safe, scientifically sound guidance on:
 1. Hydro-acoustic water ejection: How 165Hz sine waves, continuous tones, and pulsed acoustic pressure create physical vibrations that dislodge trapped water droplets from smartphone speaker grilles and earpieces.
 2. Emergency wet phone care:
    - Immediate first steps: disconnect from charger immediately, remove cases/accessories, hold speaker pointing down onto an absorbent cloth, allow natural evaporation in a well-ventilated room.
-   - What NOT to do: DO NOT insert pins, needles, cotton swabs, or sharp objects into speaker grilles. DO NOT apply direct excessive heat (e.g. hair dryers, ovens, direct radiators) as this melts waterproof adhesives and damages diaphragms. DO NOT plug in the charger while moisture may be present. DO NOT shake violently (this forces liquid deeper into internal electronics). DO NOT use uncooked rice (rice grains and starch powder seep into ports, cake with moisture, and clog speaker mesh).
+   - What NOT to do: DO NOT insert pins, needles, cotton swabs, or sharp objects into speaker grilles. DO NOT apply direct excessive heat (hair dryers, ovens) as this melts waterproof adhesives and damages diaphragms. DO NOT plug in charger while wet. DO NOT shake violently. DO NOT use uncooked rice (rice powder cakes and clogs speaker mesh).
 3. Speaker Diagnostics:
    - How to test and diagnose muffled sound, crackling, low volume, distorted bass, and left/right stereo channel balance.
-   - Differences between temporary acoustic damping from surface moisture vs permanent diaphragm tear or corrosion.
 4. Smartphone Specifications & Water Resistance:
-   - IP67 (immersion up to 1 meter for 30 minutes) vs IP68 (1.5 to 6 meters for 30 minutes, e.g., iPhone 12 through 16 are rated IP68 for 6 meters).
-   - Clarify that water resistance degrades over time with normal wear, drops, temperature shifts, and exposure to soap/chlorine/saltwater.
-   - Manufacturer warranties (Apple, Samsung, Google) do not cover liquid damage under standard limited warranties.
-5. Use Google Search grounding to retrieve current, verified device specs, teardowns, and manufacturer repair advisories when specific phone models or recent tech news are mentioned.
+   - IP67/IP68 ratings, wear over time, and manufacturer liquid damage policies.
 
 Formatting Guidelines:
 - Provide clear, direct, and concise answers with bold highlights and numbered lists for steps.
 - Maintain an encouraging, helpful, and safety-conscious tone.
-- When relevant, recommend using CleanMySpeaker's 165Hz Water Eject tool, Frequency Sweep, or Stereo Balance test as a safe diagnostic step.`;
+- Recommend CleanMySpeaker's 165Hz Water Eject tool or Frequency Sweep as a safe direct step.`;
 
       let response: any = null;
       let usedSearch = false;
 
-      // Tier 1: Try gemini-3.8-flash with Google Search Grounding if enabled
+      // Helper with timeout to prevent mobile network dropouts
+      const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
+        return Promise.race([
+          promise,
+          new Promise<T>((_, reject) =>
+            setTimeout(() => reject(new Error('Request timed out')), ms)
+          ),
+        ]);
+      };
+
+      // Tier 1: Try gemini-3.8-flash with Google Search Grounding if enabled (fast 8s timeout)
       if (enableSearch) {
         try {
-          response = await ai.models.generateContent({
-            model: 'gemini-3.8-flash',
-            contents,
-            config: {
-              systemInstruction,
-              tools: [{ googleSearch: {} }],
-            },
-          });
+          response = await withTimeout(
+            ai.models.generateContent({
+              model: 'gemini-3.8-flash',
+              contents,
+              config: {
+                systemInstruction,
+                tools: [{ googleSearch: {} }],
+              },
+            }),
+            8000
+          );
           usedSearch = true;
         } catch {
-          // If search grounding hits rate limit or quota, proceed to standard prompt
+          // If search grounding times out or fails, fallback to direct models
         }
       }
 
-      // Tier 2: Try gemini-3.8-flash without search tools
+      // Tier 2: Try gemini-3.8-flash direct (fast 7s timeout)
       if (!response) {
         try {
-          response = await ai.models.generateContent({
-            model: 'gemini-3.8-flash',
-            contents,
-            config: {
-              systemInstruction,
-            },
-          });
+          response = await withTimeout(
+            ai.models.generateContent({
+              model: 'gemini-3.8-flash',
+              contents,
+              config: {
+                systemInstruction,
+              },
+            }),
+            7000
+          );
         } catch {
           // Proceed to next tier
         }
       }
 
-      // Tier 3: Try gemini-flash-latest
+      // Tier 3: Try gemini-flash-latest (6s timeout)
       if (!response) {
         try {
-          response = await ai.models.generateContent({
-            model: 'gemini-flash-latest',
-            contents,
-            config: {
-              systemInstruction,
-            },
-          });
+          response = await withTimeout(
+            ai.models.generateContent({
+              model: 'gemini-flash-latest',
+              contents,
+              config: {
+                systemInstruction,
+              },
+            }),
+            6000
+          );
         } catch {
           // Proceed to next tier
         }
       }
 
-      // Tier 4: Try gemini-3.1-flash-lite
+      // Tier 4: Try gemini-3.1-flash-lite (5s timeout)
       if (!response) {
         try {
-          response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
-            contents,
-            config: {
-              systemInstruction,
-            },
-          });
+          response = await withTimeout(
+            ai.models.generateContent({
+              model: 'gemini-3.1-flash-lite',
+              contents,
+              config: {
+                systemInstruction,
+              },
+            }),
+            5000
+          );
         } catch {
           // Proceed to local diagnostic fallback
         }

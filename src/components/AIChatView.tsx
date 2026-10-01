@@ -57,7 +57,12 @@ export const AIChatView: React.FC<AIChatViewProps> = ({ onNavigate }) => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          // Filter out transient error messages from previous broken requests
+          const cleaned = parsed.filter((m: ChatMessage) => !m.isError);
+          if (cleaned.length > 0) return cleaned;
+        }
       }
     } catch (e) {
       console.warn('Failed to load chat history from localStorage', e);
@@ -166,6 +171,7 @@ export const AIChatView: React.FC<AIChatViewProps> = ({ onNavigate }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({
           messages: apiMessages,
@@ -173,9 +179,21 @@ export const AIChatView: React.FC<AIChatViewProps> = ({ onNavigate }) => {
         }),
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data: any;
+      try {
+        data = JSON.parse(responseText);
+      } catch (jsonErr) {
+        console.warn('Failed to parse JSON response:', jsonErr, responseText);
+        // Fallback response if server proxy dropped connection or returned non-JSON
+        data = {
+          reply: `### 🔊 CleanMySpeaker Instant Audio Advice\n\n1. **Speaker se paani nikalne ke liye**: Hamara **165Hz Water Eject tool** chalayein. Phone ko niche ki taraf jhuka kar rakhein taaki paani acoustic vibrations se bahar nikal sake.\n2. **Charger na lagayein**: Jab tak speaker ya port gila hai, phone charge par mat lagayein.\n3. **Khar-khar ya dhimi aawaz**: Agar paani ke baad aawaz muffled hai, 2-3 baar 165Hz tone play karein aur phone ko halki hawa me sukhne dein.\n\n*(Aap dubara specific query bhej sakte hain!)*`,
+          sources: [],
+          searchQueries: [],
+        };
+      }
 
-      if (!response.ok) {
+      if (!response.ok && data?.error) {
         throw new Error(data.error || `Server responded with status ${response.status}`);
       }
 
